@@ -1,0 +1,31 @@
+{
+  "name": "@ntlab/identity",
+  "version": "1.0.0",
+  "description": "A foundation for identity acquisition and identification",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tohenk/node-identity.git"
+  },
+  "keywords": [
+    "identify",
+    "acquisition",
+    "identification"
+  ],
+  "author": "Toha <tohenk@yahoo.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tohenk/node-identity/issues"
+  },
+  "homepage": "https://github.com/tohenk/node-identity#readme",
+  "dependencies": {
+    "@ntlab/ntlib": "^2.0.5",
+    "@ntlab/work": "^1.1.2",
+    "debug": "^4.3.4",
+    "socket.io": "^4.7.1",
+    "socket.io-client": "^4.7.1"
+  }
+}

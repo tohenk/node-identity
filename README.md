@@ -1,2 +1,3 @@
-# node-identity
-A biometric identity authentication using fingerprints or faces
+# About
+
+A foundation for identity acquisition and identification.
