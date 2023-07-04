@@ -24,11 +24,11 @@
 
 const debug = require('debug')('identity:ipc');
 const Stringify = require('@ntlab/ntlib/stringify');
-const { ipcMain } = require('electron');
 
 class IPC {
 
     handle(cmds, callback) {
+        const { ipcMain } = require('electron');
         cmds.forEach(channel => {
             ipcMain.handle(channel, async (event, data) => {
                 if (this.webContents !== event.sender) {
