@@ -44,26 +44,16 @@ class Socket {
     }
 
     onstart() {
-        if (this.io === undefined) {
-            const { Server } = require('socket.io');
-            const http = this.options.http;
-            if (!http) {
-                throw new Error('HTTP server must be passed in options!');
-            }
-            const config = this.options.config || {};
-            if (!config.cors) {
-                config.cors = {origin: '*'};
-            }
-            const namespace = `/${this.options.namespace ? this.options.namespace : ''}`;
-            this.io = new Server(http, config);
-            this.io.of(namespace)
-                .on('connection', socket => {
-                    this.handleConnection(socket);
-                });
-            const addr = http.address();
-            const url = `${addr.port === 443 ? 'https' : 'http'}://${addr.family === 'IPv6' ? '[' + addr.address + ']' : addr.address}${addr.port !== 80 && addr.port !== 443 ? ':' + addr.port : ''}${namespace}`; 
-            this.log('Socket connection ready on %s', url);
-        }
+        const io = Socket.factory(this.options);
+        const http = this.options.http;
+        const namespace = `/${this.options.namespace ? this.options.namespace : ''}`;
+        io.of(namespace)
+            .on('connection', socket => {
+                this.handleConnection(socket);
+            });
+        const addr = http.address();
+        const url = `${addr.port === 443 ? 'https' : 'http'}://${addr.family === 'IPv6' ? '[' + addr.address + ']' : addr.address}${addr.port !== 80 && addr.port !== 443 ? ':' + addr.port : ''}${namespace}`; 
+        this.log('Socket connection ready on %s', url);
     }
 
     handleConnection(socket) {
@@ -97,6 +87,22 @@ class Socket {
         } else {
             debug(...args);
         }
+    }
+
+    static factory(options) {
+        if (Socket.io === undefined) {
+            const { Server } = require('socket.io');
+            const http = options.http;
+            if (!http) {
+                throw new Error('HTTP server must be passed in options!');
+            }
+            const config = options.config || {};
+            if (!config.cors) {
+                config.cors = {origin: '*'};
+            }
+            Socket.io = new Server(http, config);
+        }
+        return Socket.io;
     }
 }
 
