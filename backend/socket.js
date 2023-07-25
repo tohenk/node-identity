@@ -60,10 +60,10 @@ class Socket {
         if (this.clients.indexOf(socket) < 0) {
             this.clients.push(socket);
         }
-        this.log('Client connected: %s', socket.id);
+        this.log('%s> connected', socket.id);
         socket
             .on('disconnect', () => {
-                this.log('Client disconnected: %s', socket.id);
+                this.log('%s> disconnected', socket.id);
                 const idx = this.clients.indexOf(socket);
                 if (idx >= 0) {
                     this.clients.splice(idx, 1);
