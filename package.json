@@ -1,6 +1,6 @@
 {
   "name": "@ntlab/identity",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A foundation for identity acquisition and identification",
   "main": "index.js",
   "scripts": {

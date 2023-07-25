@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 
+const crypto = require('crypto');
 const util = require('util');
 const ntutil = require('@ntlab/ntlib/util');
 
@@ -215,6 +216,12 @@ class Identity {
 
     normalizeTemplate(data) {
         return data;
+    }
+
+    genId() {
+        const shasum = crypto.createHash('sha1');
+        shasum.update(new Date().getTime().toString());
+        return shasum.digest('hex').substring(0, 8);
     }
 
     reset() {
