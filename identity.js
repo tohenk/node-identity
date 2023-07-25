@@ -90,7 +90,7 @@ class Identity {
     getIdentifier() {
         if (!this.identifier) {
             const options = {
-                normalize: data => this.normalizeTemplate(data),
+                normalize: data => this.normalize(data),
                 logger: (...args) => this.log(...args),
             }
             if (this.proxies.length) {
@@ -214,7 +214,7 @@ class Identity {
         }
     }
 
-    normalizeTemplate(data) {
+    normalize(data) {
         return data;
     }
 
