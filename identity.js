@@ -174,7 +174,7 @@ class Identity {
                 res.success = retval;
             } else if (retval !== undefined) {
                 res.success = true;
-                if (typeof retval === 'object') {
+                if (typeof retval === 'object' && retval.constructor.name === 'Object') {
                     Object.assign(res, retval);
                 } else {
                     res.data = retval;
