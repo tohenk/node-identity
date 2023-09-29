@@ -72,9 +72,18 @@ class Socket {
         this.cmds.forEach(channel => {
             socket.on(channel, async data => {
                 this.log('%s> handle message: %s', socket.id, channel);
+                if (typeof this.options.onrequest === 'function') {
+                    this.options.onrequest(socket, channel, data);
+                }
                 const res = await this.callback(channel, data);
                 if (res !== undefined) {
-                    socket.emit(channel, res);
+                    if (typeof this.options.onresponse === 'function') {
+                        this.options.onresponse(socket, channel, data, res, () => {
+                            socket.emit(channel, res);
+                        });
+                    } else {
+                        socket.emit(channel, res);
+                    }
                 }
             });
         });
