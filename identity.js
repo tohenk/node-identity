@@ -218,12 +218,6 @@ class Identity {
         return data;
     }
 
-    genId() {
-        const shasum = crypto.createHash('sha1');
-        shasum.update(new Date().getTime().toString());
-        return shasum.digest('hex').substring(0, 8);
-    }
-
     reset() {
         if (!this.resetted) {
             this.resetted = true;
@@ -231,6 +225,12 @@ class Identity {
                 this.onreset();
             }
         }
+    }
+
+    static genId() {
+        const shasum = crypto.createHash('sha1');
+        shasum.update(new Date().getTime().toString());
+        return shasum.digest('hex').substring(0, 8);
     }
 
     static get MODE_ALL() {
