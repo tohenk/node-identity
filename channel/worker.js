@@ -25,6 +25,7 @@
 const Local = require('./local');
 const { Worker } = require('worker_threads');
 const debug = require('debug')('identity:channel:worker');
+const util = require('util');
 
 class MultiWorker extends Local {
 
@@ -49,7 +50,7 @@ class MultiWorker extends Local {
                 switch (data.cmd) {
                     case 'done':
                         onclean(worker, !this.keepWorker, 'done');
-                        debug(`Worker ${data.worker}: ${data.work.id} done with ${data.matched === null ? 'NULL' : data.matched}`);
+                        debug(`Worker ${data.worker}: ${data.work.id} done with ${data.matched === null ? 'NULL' : util.inspect(data.matched)}`);
                         if (data.matched !== null) {
                             done({matched: data.matched});
                         } else {
