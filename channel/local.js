@@ -32,6 +32,7 @@ class Local extends Channel {
         this.maxWorks = this.options.maxWorks;
         this.maxWorker = this.options.maxWorker || require('os').cpus().length;
         this.keepWorker = typeof this.options.keep !== 'undefined' ? this.options.keep : true;
+        this.hasConfidence = this.options.hasConfidence;
         this.workers = [];
         this.processing = [];
     }
@@ -98,11 +99,28 @@ class Local extends Channel {
                     }
                 }
             }
+            let confidence;
             const q = new Queue(sequences, seq => {
                 let start = (seq - 1) * this.maxWorks;
                 let end = Math.min(start + this.maxWorks, ids.length) - 1;
                 const worker = this.getWorker(cleanwork, () => q.next(), res => {
                     if (res) {
+                        if (res.matched) {
+                            if (typeof res.matched === 'object') {
+                                if (this.hasConfidence && res.matched.confidence) {
+                                    if (confidence === undefined || res.matched.confidence > confidence) {
+                                        confidence = res.matched.confidence;
+                                        res.matched = res.matched.label;
+                                    } else {
+                                        delete res.matched;
+                                    }
+                                } else {
+                                    if (res.matched.label) {
+                                        res.matched = res.matched.label;
+                                    }
+                                }
+                            }
+                        }
                         Object.assign(result, res);
                     }
                     q.done();
@@ -119,7 +137,7 @@ class Local extends Channel {
             });
             q.once('done', () => {
                 // notify to stop when a matched is already found
-                if (result.matched !== null) {
+                if (result.matched !== null && !this.hasConfidence) {
                     for (let i = 0; i < workers.length; i++) {
                         this.doWork(workers[i], {cmd: 'stop'});
                     }
