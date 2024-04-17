@@ -1,6 +1,6 @@
 {
   "name": "@ntlab/identity",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "A foundation for identity acquisition and identification",
   "main": "index.js",
   "scripts": {
@@ -23,9 +23,9 @@
   "homepage": "https://github.com/tohenk/node-identity#readme",
   "dependencies": {
     "@ntlab/ntlib": "^2.0.5",
-    "@ntlab/work": "^1.1.5",
+    "@ntlab/work": "^2.0.0",
     "debug": "^4.3.4",
-    "socket.io": "^4.7.2",
-    "socket.io-client": "^4.7.2"
+    "socket.io": "^4.7.5",
+    "socket.io-client": "^4.7.5"
   }
 }
