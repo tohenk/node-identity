@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2023 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2023-2025 Toha <tohenk@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -24,13 +24,11 @@
 
 const Local = require('./local');
 const { fork } = require('child_process');
-const debug = require('debug')('identity:channel:cluster');
-const util = require('util');
 
 class MultiCluster extends Local {
 
-    getWorker(onclean, next, done) {
-        let worker = null;
+    createWorker() {
+        let worker;
         // use idle worker if possible
         for (let i = 0; i < this.workers.length; i++) {
             if (this.processing.indexOf(this.workers[i]) < 0) {
@@ -39,28 +37,10 @@ class MultiCluster extends Local {
                 break;
             }
         }
-        if (worker === null) {
+        if (worker === undefined) {
             worker = fork(this.worker, ['cluster']);
             this.workers.push(worker);
             this.processing.push(worker);
-        }
-        if (worker) {
-            worker.removeAllListeners();
-            worker.once('message', data => {
-                switch (data.cmd) {
-                    case 'done':
-                        onclean(worker, !this.keepWorker, 'done');
-                        debug(`Worker ${data.worker}: ${data.work.id} done with ${data.matched === null ? 'NULL' : util.inspect(data.matched)}`);
-                        if (data.matched !== null) {
-                            done({matched: data.matched});
-                        } else {
-                            next();
-                        }
-                        break;
-                }
-            });
-            worker.once('error', err => onclean(worker, !this.keepWorker, err));
-            worker.once('exit', code => onclean(worker, true, code));
         }
         return worker;
     }

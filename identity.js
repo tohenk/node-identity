@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2023 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2023-2025 Toha <tohenk@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -25,6 +25,7 @@
 const crypto = require('crypto');
 const util = require('util');
 const ntutil = require('@ntlab/ntlib/util');
+const Channel = require('./channel');
 
 class Identity {
 
@@ -56,8 +57,8 @@ class Identity {
     start() {
         const cmds = [];
         if (this.commands) {
-            const addCmds = xcmds => {
-                xcmds.forEach(cmd => {
+            const addCmds = commands => {
+                commands.forEach(cmd => {
                     cmd = this.getPrefix(cmd);
                     if (cmds.indexOf(cmd) < 0) {
                         cmds.push(cmd);
@@ -87,6 +88,9 @@ class Identity {
     finalize() {
     }
 
+    /**
+     * @returns {Channel}
+     */
     getIdentifier() {
         if (!this.identifier) {
             const options = {
@@ -166,9 +170,11 @@ class Identity {
         const handler = this.getCmd(cmd);
         if (handler) {
             const res = {success: false};
-            let retval = handler(data);
-            if (retval instanceof Promise) {
-                retval = await retval;
+            let retval;
+            if (handler.toString().startsWith('async')) {
+                retval = await handler(data);
+            } else {
+                retval = handler(data);
             }
             if (retval === true || retval === false) {
                 res.success = retval;
@@ -196,8 +202,7 @@ class Identity {
         }
     }
 
-    log() {
-        const args = Array.from(arguments);
+    log(...args) {
         const time = new Date();
         if (args.length) {
             let prefix = ntutil.formatDate(time, 'MM-dd HH:mm:ss.zzz');

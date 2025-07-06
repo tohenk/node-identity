@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2023 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2023-2025 Toha <tohenk@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -24,6 +24,8 @@
 
 const Channel = require('./index');
 const Queue = require('@ntlab/work/queue');
+const util = require('util');
+const debug = require('debug')('identity:channel:local');
 
 class Local extends Channel {
 
@@ -76,16 +78,17 @@ class Local extends Channel {
             const items = Array.from(this.templates.values());
             const count = Math.ceil(ids.length / this.maxWorks);
             this.log('Starting identify %s with %d sample(s) for %s', workId, items.length, id);
-            let sequences = Array.from({length: count}, (_, x) => x + 1);
+            const sequences = Array.from({length: count}, (_, x) => x + 1);
             const work = {
                 id: workId,
-                items: items,
+                items,
                 feature: this.normalize(feature),
                 start: Date.now(),
             }
             const result = {matched: null};
             const cleanwork = (worker, exit, reason) => {
                 if (worker) {
+                    worker.removeAllListeners();
                     if (workers.indexOf(worker) >= 0) {
                         workers.splice(workers.indexOf(worker), 1);
                     }
@@ -101,8 +104,8 @@ class Local extends Channel {
             }
             let confidence;
             const q = new Queue(sequences, seq => {
-                let start = (seq - 1) * this.maxWorks;
-                let end = Math.min(start + this.maxWorks, ids.length) - 1;
+                const start = (seq - 1) * this.maxWorks;
+                const end = Math.min(start + this.maxWorks, ids.length) - 1;
                 const worker = this.getWorker(cleanwork, () => q.next(), res => {
                     if (res) {
                         if (res.matched) {
@@ -127,7 +130,7 @@ class Local extends Channel {
                 });
                 if (worker) {
                     workers.push(worker);
-                    this.doWork(worker, {cmd: 'do', work: work, start: start, end: end});
+                    this.doWork(worker, {cmd: 'do', work, start, end});
                 }
                 if (!work.finish) {
                     q.next();
@@ -166,7 +169,44 @@ class Local extends Channel {
         });
     }
 
+    handleMessage(worker, onclean, next, done) {
+        const cleanup = () => {
+            worker.removeAllListeners();
+            return worker;
+        }
+        cleanup()
+            .on('message', data => {
+                switch (data.cmd) {
+                    case 'done':
+                        onclean(worker, !this.keepWorker, 'done');
+                        debug(`Worker ${data.worker}: ${data.work.id} done with ${data.matched === null ? 'NULL' : util.inspect(data.matched)}`);
+                        if (data.matched !== null) {
+                            done({matched: data.matched});
+                        } else {
+                            next();
+                        }
+                        break;
+                    case 'update':
+                        if (data.index !== undefined && data.data !== undefined) {
+                            const id = this.templates.keys()[data.index];
+                            this.templates.set(id, data.data);
+                        }
+                        break;
+                }
+            })
+            .on('error', err => onclean(worker, !this.keepWorker, err))
+            .on('exit', code => onclean(worker, true, code));
+    }
+
     getWorker(onclean, next, done) {
+        const worker = this.createWorker();
+        if (worker) {
+            this.handleMessage(worker, onclean, next, done);
+        }
+        return worker;
+    }
+
+    createWorker() {
     }
 
     doWork(worker, data) {

@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2023 Toha <tohenk@yahoo.com>
+ * Copyright (c) 2023-2025 Toha <tohenk@yahoo.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -89,8 +89,7 @@ class Socket {
         });
     }
 
-    log() {
-        const args = Array.from(arguments);
+    log(...args) {
         if (this.parent) {
             this.parent.log(...args);
         } else {
