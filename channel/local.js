@@ -189,7 +189,11 @@ class Local extends Channel {
                     case 'update':
                         if (data.index !== undefined && data.data !== undefined) {
                             const id = this.templates.keys()[data.index];
-                            this.templates.set(id, data.data);
+                            if (data.data === null) {
+                                this.templates.delete(id);
+                            } else {
+                                this.templates.set(id, data.data);
+                            }
                         }
                         break;
                 }
