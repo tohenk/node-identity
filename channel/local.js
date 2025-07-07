@@ -106,7 +106,7 @@ class Local extends Channel {
             const q = new Queue(sequences, seq => {
                 const start = (seq - 1) * this.maxWorks;
                 const end = Math.min(start + this.maxWorks, ids.length) - 1;
-                const worker = this.getWorker(cleanwork, () => q.next(), res => {
+                const worker = this.getWorker(ids, cleanwork, () => q.next(), res => {
                     if (res) {
                         if (res.matched) {
                             if (typeof res.matched === 'object') {
@@ -169,7 +169,7 @@ class Local extends Channel {
         });
     }
 
-    handleMessage(worker, onclean, next, done) {
+    handleMessage(worker, ids, onclean, next, done) {
         const cleanup = () => {
             worker.removeAllListeners();
             return worker;
@@ -188,7 +188,7 @@ class Local extends Channel {
                         break;
                     case 'update':
                         if (data.index !== undefined && data.data !== undefined) {
-                            const id = this.templates.keys()[data.index];
+                            const id = ids[data.index];
                             if (data.data === null) {
                                 this.templates.delete(id);
                             } else {
@@ -202,10 +202,10 @@ class Local extends Channel {
             .on('exit', code => onclean(worker, true, code));
     }
 
-    getWorker(onclean, next, done) {
+    getWorker(ids, onclean, next, done) {
         const worker = this.createWorker();
         if (worker) {
-            this.handleMessage(worker, onclean, next, done);
+            this.handleMessage(worker, ids, onclean, next, done);
         }
         return worker;
     }
