@@ -76,7 +76,8 @@ class Local extends Channel {
             const workId = this.genId();
             const ids = Array.from(this.templates.keys());
             const items = Array.from(this.templates.values());
-            const count = Math.ceil(ids.length / this.maxWorks);
+            const maxlen = this.maxWorks > 0 ? this.maxWorks : ids.length;
+            const count = Math.ceil(ids.length / maxlen);
             this.log('Starting identify %s with %d sample(s) for %s', workId, items.length, id);
             const sequences = Array.from({length: count}, (_, x) => x + 1);
             const work = {
@@ -104,8 +105,8 @@ class Local extends Channel {
             }
             let confidence;
             const q = new Queue(sequences, seq => {
-                const start = (seq - 1) * this.maxWorks;
-                const end = Math.min(start + this.maxWorks, ids.length) - 1;
+                const start = (seq - 1) * maxlen;
+                const end = Math.min(start + maxlen, ids.length) - 1;
                 const worker = this.getWorker(ids, cleanwork, () => q.next(), res => {
                     if (res) {
                         if (res.matched) {
